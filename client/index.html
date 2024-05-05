@@ -386,13 +386,14 @@ html {
 	background: #555;
 }
 
-@media(max-width: 576px) {
+@media(max-width: 640px) {
 	.contacts_card {
 		margin-bottom: 15px !important;
 	}
+
 }
 
-@media only screen and (max-width: 576px) {
+@media only screen and (max-width: 640px) {
     .card {
         height: auto !important;
     }
@@ -400,7 +401,11 @@ html {
 		display: none;
 	}
 	.col-md-8{
-		height: 100%;
+		height: 100%!important;
+		display: flex !important;
+		width: auto !important;
+		padding-top: 10px;
+		padding-bottom: 10px;
 	}
 
     .contacts_body,
