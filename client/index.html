@@ -12,7 +12,11 @@
 	<script>
 		document.addEventListener('DOMContentLoaded', function() {
 			// Tu script aquí
-			const socket = io();
+			const socket = io({
+				auth:{
+					serverOffset: 0
+				}
+			});
 
 			// Función para agregar un nuevo mensaje al chat
 			function addMessageToChat(message) {
@@ -33,7 +37,6 @@
 					switch (type) {
 					case 'ENT': // Mensaje de nuevo usuario
 						const username = parts[1];
-						console.log(username)
 						const joinTime = getCurrentTime(); // Obtener la hora actual
 						return `<span style="color: green;">${username}</span> se ha unido al chat (${joinTime})`;
 
@@ -64,7 +67,7 @@
 			}
 
 			// Escuchar el evento 'mensajeDesdeServidor' y agregar el mensaje al chat
-			socket.on('mensajeDesdeServidor', (mensaje) => {
+			socket.on('mensajeDesdeServidor', (mensaje,serverOffset) => {
 				const formattedMessage = formatMessage(mensaje);
 				addMessageToChat(`<div class="d-flex justify-content-start mb-4">
 									<div class="img_cont_msg">
@@ -72,6 +75,7 @@
 									</div>
 									<div class="msg_cotainer">${formattedMessage}</div>
 								</div>`);
+				socket.auth.serverOffset = serverOffset
 			});
 
 			// Escuchar el evento de enviar mensaje desde el formulario
@@ -390,13 +394,6 @@ html {
 	.contacts_card {
 		margin-bottom: 15px !important;
 	}
-
-}
-
-@media only screen and (max-width: 640px) {
-    .card {
-        height: auto !important;
-    }
 	.col-md-4{
 		display: none;
 	}
@@ -407,6 +404,13 @@ html {
 		padding-top: 10px;
 		padding-bottom: 10px;
 	}
+
+}
+
+@media only screen and (max-width: 640px) {
+    .card {
+        height: auto !important;
+    }
 
     .contacts_body,
     .msg_card_body {
