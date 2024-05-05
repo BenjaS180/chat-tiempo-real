@@ -59,6 +59,6 @@ app.get('/', (req, res) => {
     res.sendFile(process.cwd() + '/client/index.html');
 });
 
-server.listen(port, '172.20.10.4', () => {
-    console.log(`Server running on http://172.20.10.4:${port}`);
+server.listen(port, '0.0.0.0', () => {
+    console.log(`Server running on http://0.0.0.0:${port}`);
 });
