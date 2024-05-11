@@ -121,6 +121,7 @@ html {
 }
 
 .card {
+	margin-top: auto;
 	height: 500px;
 	border-radius: 15px !important;
 	background-color: rgba(0, 0, 0, 0.4) !important;
@@ -390,28 +391,30 @@ html {
 	background: #555;
 }
 
-@media(max-width: 640px) {
+@media(max-width: 700px) {
 	.contacts_card {
 		margin-bottom: 15px !important;
+		display: none;
+
 	}
-	.col-md-4{
+	.contacts_body{
 		display: none;
 	}
-	.col-md-8{
-		height: 100%!important;
-		display: flex !important;
-		width: auto !important;
-		padding-top: 10px;
-		padding-bottom: 10px;
+	.chat {
+    width: 100%; /* Ocupa todo el ancho */
+    height: 100vh; /* Ocupa toda la altura de la pantalla */
 	}
+	.card {
+			height: 1000px !important;
 
+	}
 }
 
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 520px) {
     .card {
         height: auto !important;
     }
-
+	
     .contacts_body,
     .msg_card_body {
         height: calc(50% - 60px) !important;
@@ -437,6 +440,14 @@ html {
     .msg_cotainer,
     .msg_cotainer_send {
         font-size: 12px;
+    }
+}
+@media (min-width: 768px) {
+    .col-md-4 {
+        -ms-flex: 0 0 33.333333%;
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+        display: none;
     }
 }
 
