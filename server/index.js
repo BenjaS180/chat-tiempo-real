@@ -7,6 +7,10 @@ import net from 'net';
 import dotenv from 'dotenv'
 import { createClient } from '@libsql/client';
 import jwt from 'jsonwebtoken';
+import cookieParser from 'cookie-parser';
+import cookieJwtAuth from '../middleware/cookieJwtAuth.js';
+import Add from '../routes/add.js';
+import bodyParser from 'body-parser';
 
 dotenv.config()
 
@@ -35,8 +39,12 @@ CREATE TABLE IF NOT EXISTS messages (
 `)
 
 
-app.use(express.urlencoded({ extended: true })); // Middleware para analizar cuerpos de solicitud codificados en url
 app.use(express.json()); // Middleware para analizar cuerpos de solicitud JSON
+app.use(logger('dev'));
+app.use(cookieParser())
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }));
+
 
 
 // Configurar cliente TCP para comunicarse con el servidor remoto
@@ -120,7 +128,6 @@ io.on('connection', async (socket) => {
 
 });
 
-app.use(logger('dev'));
 
 
 
@@ -129,25 +136,11 @@ app.get('/', (req, res) => {
 });
 
 
-function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
 
-    if (token == null) return res.sendStatus(401);
-
-    jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
-        if (err) return res.sendStatus(403);
-        req.user = user;
-        next();
-    });
-}
-
-
-app.get('/chat', authenticateToken, (req, res) => {
-    // Si el middleware authenticateToken pasa (es decir, el usuario está autenticado),
-    // enviar el archivo HTML de la página de chat.
+app.get('/chat', (req, res) => {
     res.sendFile(process.cwd() + '/client/index.html');
 });
+
 
 // Manejar el acceso no autorizado a la ruta de chat
 app.use('/chat', (req, res) => {
@@ -160,23 +153,24 @@ app.get('/admin', (req, res) => {
 });
 
 
+
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
-
-    console.log('Username:', username);
-    console.log('Password:', password);
+    console.log(req.body)
+    console.log(username,password)
 
     try {
         // Verificar las credenciales en la base de datos
         const result = await db.execute({
-            sql: 'SELECT username, password FROM users WHERE username = ? AND password = ?',
-            args: [username, password]
+            sql: 'SELECT username, password FROM users WHERE username = :username AND password = :password',
+            args: {username:username,
+                    password:password}
         });
+        console.log(result.rows)
 
         // Verificar si hay resultados en el resultado de la consulta
         if (result && result.rows && result.rows.length > 0) {
-            // Credenciales válidas, redireccionar al usuario a la página de chat
-            res.status(200).json({ message: 'Login successful' });
+            res.redirect('/chat')
         } else {
             // No se encontraron resultados, credenciales inválidas
             res.status(401).json({ error: 'Invalid username or password' });
@@ -185,25 +179,11 @@ app.post('/login', async (req, res) => {
         console.error('Error al iniciar sesión:', error);
         res.status(500).json({ error: 'Error al iniciar sesión' });
     }
+
 });
 
-app.post('/verifyToken', (req, res) => {
-    const token = req.headers['authorization']?.split(' ')[1];
 
-    if (token) {
-        jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
-            if (err) {
-                console.error('Error verifying token:', err);
-                res.sendStatus(403);
-            } else {
-                // Token válido
-                res.sendStatus(200);
-            }
-        });
-    } else {
-        res.sendStatus(401); // No se proporcionó ningún token
-    }
-});
+
 
 app.post('/createUser', async (req, res) => {
     const { username, password } = req.body;
