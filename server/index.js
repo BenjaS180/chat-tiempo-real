@@ -5,16 +5,17 @@ import { Server } from 'socket.io';
 import { createServer } from 'http';
 import net from 'net';
 import dotenv from 'dotenv'
-import { createClient } from '@libsql/client';
+import {createClient}  from '@libsql/client';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import cookieJwtAuth from '../middleware/cookieJwtAuth.js';
-import Add from '../routes/add.js';
 import bodyParser from 'body-parser';
+import { jwtDecode } from "jwt-decode";
 
 dotenv.config()
 
-process.env.TOKEN_SECRET;
+
+
 const port = process.env.PORT ?? 8000;
 
 const app = express();
@@ -137,21 +138,34 @@ app.get('/', (req, res) => {
 
 
 
-app.get('/chat', (req, res) => {
+app.get('/chat',cookieJwtAuth, (req, res) => {
     res.sendFile(process.cwd() + '/client/index.html');
 });
 
 
+
 // Manejar el acceso no autorizado a la ruta de chat
-app.use('/chat', (req, res) => {
+app.use('/chat',(req, res) => {
     // Si el usuario no está autenticado, enviar un mensaje de error o redirigir a otra página.
     res.status(403).send('Acceso no autorizado. Por favor, inicie sesión para acceder al chat.');
 });
 
-app.get('/admin', (req, res) => {
-    res.sendFile(process.cwd() + '/client/admin.html');
+app.get('/admin', cookieJwtAuth, (req, res) => {
+    const token = req.cookies.token;
+    const decoded_token = jwtDecode(token);
+    console.log(decoded_token);
+    const user = decoded_token.username;
+    try {
+        if (user === 'carol') {
+            res.sendFile(process.cwd() + '/client/admin.html');
+        } else {
+            throw new Error('Unauthorized access'); // If the user is not 'carol', throw an error
+        }
+    } catch (error) {
+        console.error('Error al iniciar sesión no eres carol:', error);
+        res.status(500).json({ error: 'No eres carol' });
+    }
 });
-
 
 
 app.post('/login', async (req, res) => {
@@ -170,7 +184,17 @@ app.post('/login', async (req, res) => {
 
         // Verificar si hay resultados en el resultado de la consulta
         if (result && result.rows && result.rows.length > 0) {
+            const user = result.rows[0].username
+            console.log(user)
+            const token = jwt.sign({username:user}, process.env.TOKEN_SECRET, { expiresIn: "1h"});
+            const decoded_Token = jwtDecode(token) 
+            console.log(decoded_Token)
+
+            res.cookie("token", token, {
+                httpOnly:true,
+            })
             res.redirect('/chat')
+
         } else {
             // No se encontraron resultados, credenciales inválidas
             res.status(401).json({ error: 'Invalid username or password' });

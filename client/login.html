@@ -6,10 +6,86 @@
     <title>Login</title>
     <!-- the form awesome library is used to add icons to our form -->
     <!-- include the stylesheet file -->
+    <style>
+        :root {
+    --blue: #007bff;
+    --indigo: #6610f2;
+    --purple: #6f42c1;
+    --pink: #e83e8c;
+    --red: #dc3545;
+    --orange: #fd7e14;
+    --yellow: #ffc107;
+    --green: #28a745;
+    --teal: #20c997;
+    --cyan: #17a2b8;
+    --white: #fff;
+    --gray: #6c757d;
+    --gray-dark: #343a40;
+    --primary: #007bff;
+    --secondary: #6c757d;
+    --success: #28a745;
+    --info: #17a2b8;
+    --warning: #ffc107;
+    --danger: #dc3545;
+    --light: #f8f9fa;
+    --dark: #343a40;
+    --breakpoint-xs: 0;
+    --breakpoint-sm: 576px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 992px;
+    --breakpoint-xl: 1200px;
+    --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+body {
+            background: linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: var(--font-family-sans-serif);
+        }
+        .login {
+            background-color: var(--white);
+            padding: 40px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        input {
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid var(--gray);
+            border-radius: 5px;
+        }
+        input[type="submit"] {
+            background-color: var(--primary);
+            color: var(--white);
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: var(--dark);
+        }
+    </style>
 </head>
+
 <body>
     <div class="login">
-        <h1>Login</h1>
+        <h1>Inicio De Sesion</h1>
         <form method="POST" action="/login">
             <label for="username">
                 <!-- Font Awesome icon -->
