@@ -118,8 +118,12 @@ clientSocket.on('data', async (data) => {
 io.on('connection', async (socket) => {
     console.log('A user has connected!');
 
+    const token = req.cookies.token;
+    const decoded_token = jwtDecode(token);
+    console.log(decoded_token);
+    const user = decoded_token.username;
     socket.on('sendMessageToServer', (message) => {
-        clientSocket.write(`MSG\x02${nickName}\x02${message}\x04`);
+        clientSocket.write(`MSG\x02${user}\x02${message}\x04`);
     });
 
     socket.on('disconnect', () => {
