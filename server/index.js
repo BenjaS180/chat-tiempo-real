@@ -51,8 +51,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Configurar cliente TCP para comunicarse con el servidor remoto
 const serverAddress = '172.20.8.6';
 const serverPort = 1234;
-const nickName = 'Tesoreria(Prueba)';
 const clientSocket = net.createConnection({ host: serverAddress, port: serverPort });
+let globalSocket;
 
 // Manejar eventos de conexión y desconexión del cliente TCP
 clientSocket.on('connect', () => {
@@ -108,7 +108,15 @@ clientSocket.on('data', async (data) => {
             console.error(e)
             return
         }
-        if (!mensaje.includes(nickName)) {
+
+
+        const cookies = globalSocket.handshake.headers.cookie;
+        const token = cookies.split('; ').find(row => row.startsWith('token=')).split('=')[1];
+        const decoded_token = jwtDecode(token);
+        console.log(decoded_token);
+        const userDecoded = decoded_token.username;
+        console.log(mensaje)
+        if (!mensaje.includes(userDecoded)) {
             io.emit('mensajeDesdeServidor', mensaje, result.lastInsertRowid.toString());
         }
     }
@@ -117,11 +125,17 @@ clientSocket.on('data', async (data) => {
 // Escuchar mensajes de los clientes y enviarlos al servidor remoto a través del cliente TCP
 io.on('connection', async (socket) => {
     console.log('A user has connected!');
+    globalSocket = socket;
 
-    const token = req.cookies.token;
+    // Obtener la cookie desde socket.handshake
+    const cookies = socket.handshake.headers.cookie;
+    const token = cookies.split('; ').find(row => row.startsWith('token=')).split('=')[1];
+
+    // Decodificar el token
     const decoded_token = jwtDecode(token);
     console.log(decoded_token);
     const user = decoded_token.username;
+
     socket.on('sendMessageToServer', (message) => {
         clientSocket.write(`MSG\x02${user}\x02${message}\x04`);
     });
@@ -129,8 +143,6 @@ io.on('connection', async (socket) => {
     socket.on('disconnect', () => {
         console.log('A user has disconnected');
     });
-
-
 });
 
 
